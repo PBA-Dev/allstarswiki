@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuen Artikel erstellen - PflegeWiki</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tiny.cloud/1/pfa6cj5cajsceq97zy191uklkroc8sryur2davnywjazce9t/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="js/article-editor.js" defer></script>
+</head>
+<body>
+    <div class="wiki-container">
+        <header class="wiki-header">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="assets/logo.svg" alt="PflegeWiki Logo">
+                </a>
+            </div>
+            <a href="index.html" class="home-link">
+                <svg class="home-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/>
+                </svg>
+            </a>
+        </header>
+
+        <main class="wiki-content">
+            <h1>Neuen Artikel erstellen</h1>
+            
+            <form id="articleForm" class="article-form">
+                <div class="form-group">
+                    <label for="articleTitle">Titel:</label>
+                    <input type="text" id="articleTitle" name="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="articleCategory">Kategorie:</label>
+                    <select id="articleCategory" name="category" required>
+                        <option value="">Bitte wählen</option>
+                        <option value="pflegetheorie">Pflegetheorie</option>
+                        <option value="pflegepraxis">Pflegepraxis</option>
+                        <option value="pflegedokumentation">Pflegedokumentation</option>
+                        <option value="pflegeberatung">Pflegeberatung</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="articleContent">Inhalt:</label>
+                    <textarea id="articleContent" name="content"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Artikel speichern</button>
+                    <button type="button" class="btn-secondary" onclick="window.location.href='index.html'">Abbrechen</button>
+                </div>
+            </form>
+        </main>
+
+        <footer class="wiki-footer">
+            <p>&copy; 2024 PflegeWiki - Alle Rechte vorbehalten</p>
+        </footer>
+    </div>
+</body>
+</html>

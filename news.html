@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aktuelle Änderungen - Allstars Wiki</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/wiki-functions.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const recentArticles = JSON.parse(localStorage.getItem('recentArticles') || '[]');
+            const recentList = document.getElementById('recentList');
+
+            if (recentArticles.length === 0) {
+                recentList.innerHTML = '<p class="no-results">Keine Änderungen in den letzten 30 Tagen gefunden.</p>';
+                return;
+            }
+
+            recentArticles.forEach(article => {
+                const li = document.createElement('li');
+                const date = new Date(article.lastModified || article.createdAt);
+                
+                li.innerHTML = `
+                    <div class="recent-article">
+                        <h3>${article.title}</h3>
+                        <div class="article-meta">
+                            <span>Kategorie: ${article.category}</span>
+                            <span>Datum: ${date.toLocaleDateString()}</span>
+                        </div>
+                        <a href="#" onclick="viewArticle('${article.title}'); return false;" class="read-more">Artikel lesen →</a>
+                    </div>
+                `;
+                recentList.appendChild(li);
+            });
+        });
+
+        function viewArticle(title) {
+            const articles = JSON.parse(localStorage.getItem('wikiArticles') || '[]');
+            const article = articles.find(a => a.title === title);
+            if (article) {
+                localStorage.setItem('currentArticle', JSON.stringify(article));
+                window.location.href = 'view-article.html';
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="wiki-container">
+        <header class="wiki-header">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="https://pflegeberatung-allstars.de/wp-content/uploads/2024/04/Kopie-von-allstars-nobg-1.png" alt="Allstars Wiki Logo">
+                </a>
+            </div>
+            <div class="title">
+                <h1 class="text-4xl font-bold">
+                    All<span style="color: #ff0606;">s</span>
+                    <span style="color: #f27326;">t</span>
+                    <span style="color: #fcb11d;">a</span>
+                    <span style="color: #06a454;">r</span>
+                    <span style="color: #06bafd;">s</span>
+                    Wiki
+                </h1>
+            </div>
+            <a href="index.html" class="home-link">
+                <svg class="home-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/>
+                </svg>
+            </a>
+        </header>
+
+        <main class="wiki-content">
+            <h1>Aktuelle Änderungen</h1>
+            <p class="subtitle">Artikel der letzten 30 Tage</p>
+            
+            <ul id="recentList" class="recent-changes-list">
+                <!-- Recent articles will be loaded here -->
+            </ul>
+        </main>
+
+        <footer class="wiki-footer">
+            <p>&copy; 2024 Allstars Wiki - Alle Rechte vorbehalten</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artikel ansehen - Allstars Wiki</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const article = JSON.parse(localStorage.getItem('currentArticle'));
+            if (!article) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            document.title = `${article.title} - Allstars Wiki`;
+            document.getElementById('articleTitle').textContent = article.title;
+            document.getElementById('articleCategory').textContent = article.category;
+            document.getElementById('articleContent').innerHTML = article.content;
+            document.getElementById('articleDate').textContent = new Date(article.createdAt).toLocaleDateString();
+        });
+    </script>
+</head>
+<body>
+    <div class="wiki-container">
+        <header class="wiki-header">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="https://pflegeberatung-allstars.de/wp-content/uploads/2024/04/Kopie-von-allstars-nobg-1.png" alt="Allstars Wiki Logo">
+                </a>
+            </div>
+            <div class="title">
+                <h1 class="text-4xl font-bold">
+                    All<span style="color: #ff0606;">s</span>
+                    <span style="color: #f27326;">t</span>
+                    <span style="color: #fcb11d;">a</span>
+                    <span style="color: #06a454;">r</span>
+                    <span style="color: #06bafd;">s</span>
+                    Wiki
+                </h1>
+            </div>
+            <a href="index.html" class="home-link">
+                <svg class="home-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/>
+                </svg>
+            </a>
+        </header>
+
+        <main class="wiki-content article-view">
+            <article>
+                <h1 id="articleTitle"></h1>
+                <div class="article-meta">
+                    <span>Kategorie: <span id="articleCategory"></span></span>
+                    <span>Erstellt am: <span id="articleDate"></span></span>
+                </div>
+                <div id="articleContent" class="article-content"></div>
+            </article>
+            
+            <div class="article-actions">
+                <a href="index.html" class="btn-secondary">Zurück zur Übersicht</a>
+            </div>
+        </main>
+
+        <footer class="wiki-footer">
+            <p>&copy; 2024 Allstars Wiki - Alle Rechte vorbehalten</p>
+        </footer>
+    </div>
+</body>
+</html>

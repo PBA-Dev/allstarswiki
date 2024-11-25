@@ -3,19 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PflegeWiki - Hauptseite</title>
+    <title>Allstars Wiki - Hauptseite</title>
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="js/search.js" defer></script>
     <script src="js/navigation.js" defer></script>
+    <script src="js/display-articles.js" defer></script>
+    <script src="js/wiki-functions.js" defer></script>
 </head>
 <body>
     <div class="wiki-container">
         <header class="wiki-header">
             <div class="logo">
                 <a href="index.html">
-                    <img src="assets/logo.svg" alt="PflegeWiki Logo">
+                    <img src="https://pflegeberatung-allstars.de/wp-content/uploads/2024/04/Kopie-von-allstars-nobg-1.png" alt="Allstars Wiki Logo">
                 </a>
+            </div>
+            <div class="title">
+                <h1 class="text-4xl font-bold">
+                    All<span style="color: #ff0606;">s</span>
+                    <span style="color: #f27326;">t</span>
+                    <span style="color: #fcb11d;">a</span>
+                    <span style="color: #06a454;">r</span>
+                    <span style="color: #06bafd;">s&nbsp;</span>
+                     Wiki
+                </h1>
             </div>
             <a href="index.html" class="home-link">
                 <svg class="home-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -25,48 +37,33 @@
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="Wiki durchsuchen...">
                 <button id="searchButton">Suchen</button>
+                <a href="create-article.html" class="btn-primary create-article-btn">Neuen Artikel erstellen</a>
             </div>
         </header>
 
-        <nav class="wiki-nav">
-            <ul>
-                
-                <li><a href="articles/grundpflege.html">Grundpflege</a></li>
-                <li><a href="articles/behandlungspflege.html">Behandlungspflege</a></li>
-                <li><a href="articles/pflegedokumentation.html">Pflegedokumentation</a></li>
-                <li><a href="articles/pflegegrade.html">Pflegegrade</a></li>
-                <li><a href="articles/sozialrecht.html">Sozialrecht</a></li>
-                <li><a href="articles/hilfsmittel.html">Hilfsmittel</a></li>
-            </ul>
-        </nav>
-
         <main class="wiki-content">
-            <h1>Willkommen im PflegeWiki</h1>
-            
-            <div class="featured-articles">
-                <h2>Ausgewählte Artikel</h2>
-                <div class="article-grid">
-                    <article class="featured-article">
-                        <h3>Grundpflege</h3>
-                        <p>Grundlegende Pflegemaßnahmen zur Unterstützung bei den Aktivitäten des täglichen Lebens.</p>
-                        <a href="articles/grundpflege.html">Weiterlesen →</a>
-                    </article>
-                    <article class="featured-article">
-                        <h3>Behandlungspflege</h3>
-                        <p>Medizinische Pflegemaßnahmen nach ärztlicher Verordnung.</p>
-                        <a href="articles/behandlungspflege.html">Weiterlesen →</a>
-                    </article>
-                </div>
+            <div class="title">
+                <h2 class="text-4xl font-bold">
+                    Willkommen im All<span style="color: #ff0606;">s</span><span style="color: #f27326;">t</span><span style="color: #fcb11d;">a</span><span style="color: #06a454;">r</span><span style="color: #06bafd;">s&nbsp;</span>  Wiki
+                </h2>
             </div>
-
-            <div class="categories">
-                <h2>Kategorien</h2>
-                <ul>
-                    <li>Pflegetheorie</li>
-                    <li>Pflegepraxis</li>
-                    <li>Pflegedokumentation</li>
-                    <li>Pflegeberatung</li>
-                </ul>
+            
+            <div class="articles-section">
+                <div class="articles-header">
+                    <h2>Alle Artikel</h2>
+                    <div class="articles-filter">
+                        <select id="categoryFilter">
+                            <option value="">Alle Kategorien</option>
+                            <option value="pflegetheorie">Pflegetheorie</option>
+                            <option value="pflegepraxis">Pflegepraxis</option>
+                            <option value="pflegedokumentation">Pflegedokumentation</option>
+                            <option value="pflegeberatung">Pflegeberatung</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="article-grid" id="articleGrid">
+                    <!-- Articles will be dynamically loaded here -->
+                </div>
             </div>
         </main>
 
@@ -74,15 +71,15 @@
             <div class="quick-links">
                 <h3>Schnellzugriff</h3>
                 <ul>
-                    <li><a href="#news">Aktuelle Änderungen</a></li>
-                    <li><a href="#random">Zufälliger Artikel</a></li>
-                    <li><a href="#help">Hilfe</a></li>
+                    <li><a href="#" onclick="showRecentChanges(); return false;">Aktuelle Änderungen</a></li>
+                    <li><a href="#" onclick="openRandomArticle(); return false;">Zufälliger Artikel</a></li>
+                    <li><a href="help.html">Hilfe</a></li>
                 </ul>
             </div>
         </aside>
 
         <footer class="wiki-footer">
-            <p>&copy; 2024 PflegeWiki - Alle Rechte vorbehalten</p>
+            <p>&copy; 2024 Allstars Wiki - Alle Rechte vorbehalten</p>
         </footer>
     </div>
 </body>
