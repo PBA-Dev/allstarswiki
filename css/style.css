@@ -79,6 +79,80 @@ body {
     border-radius: 4px;
     cursor: pointer;
 }
+/* Advanced Search Styles */
+.category-filter {
+    margin-left: 10px;
+}
+
+#categorySelect {
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: white;
+}
+
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: var(--secondary-color);
+}
+
+.search-results {
+    margin-top: 20px;
+}
+
+.search-result {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: white;
+}
+
+.search-result h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.category-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-bottom: 10px;
+}
+
+mark {
+    background-color: #fff3cd;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
 .wiki-nav {
     grid-area: nav;
