@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60">
+    <style>
+        .text { font-family: Arial, sans-serif; font-weight: bold; }
+        .pflege { fill: #2a5a8c; }
+        .wiki { fill: #666; }
+    </style>
+    <text x="10" y="40" class="text pflege">Pflege</text>
+    <text x="100" y="40" class="text wiki">Wiki</text>
+</svg>

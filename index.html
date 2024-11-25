@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PflegeWiki - Hauptseite</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/search.js" defer></script>
+    <script src="js/navigation.js" defer></script>
+</head>
+<body>
+    <div class="wiki-container">
+        <header class="wiki-header">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="assets/logo.svg" alt="PflegeWiki Logo">
+                </a>
+            </div>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Wiki durchsuchen...">
+                <button id="searchButton">Suchen</button>
+            </div>
+        </header>
+
+        <nav class="wiki-nav">
+            <ul>
+                <li><a href="index.html">Hauptseite</a></li>
+                <li><a href="articles/grundpflege.html">Grundpflege</a></li>
+                <li><a href="articles/behandlungspflege.html">Behandlungspflege</a></li>
+                <li><a href="articles/pflegedokumentation.html">Pflegedokumentation</a></li>
+            </ul>
+        </nav>
+
+        <main class="wiki-content">
+            <h1>Willkommen im PflegeWiki</h1>
+            
+            <div class="featured-articles">
+                <h2>Ausgewählte Artikel</h2>
+                <div class="article-grid">
+                    <article class="featured-article">
+                        <h3>Grundpflege</h3>
+                        <p>Grundlegende Pflegemaßnahmen zur Unterstützung bei den Aktivitäten des täglichen Lebens.</p>
+                        <a href="articles/grundpflege.html">Weiterlesen →</a>
+                    </article>
+                    <article class="featured-article">
+                        <h3>Behandlungspflege</h3>
+                        <p>Medizinische Pflegemaßnahmen nach ärztlicher Verordnung.</p>
+                        <a href="articles/behandlungspflege.html">Weiterlesen →</a>
+                    </article>
+                </div>
+            </div>
+
+            <div class="categories">
+                <h2>Kategorien</h2>
+                <ul>
+                    <li>Pflegetheorie</li>
+                    <li>Pflegepraxis</li>
+                    <li>Pflegedokumentation</li>
+                    <li>Pflegeberatung</li>
+                </ul>
+            </div>
+        </main>
+
+        <aside class="wiki-sidebar">
+            <div class="quick-links">
+                <h3>Schnellzugriff</h3>
+                <ul>
+                    <li><a href="#news">Aktuelle Änderungen</a></li>
+                    <li><a href="#random">Zufälliger Artikel</a></li>
+                    <li><a href="#help">Hilfe</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <footer class="wiki-footer">
+            <p>&copy; 2024 PflegeWiki - Alle Rechte vorbehalten</p>
+        </footer>
+    </div>
+</body>
+</html>
