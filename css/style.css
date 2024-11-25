@@ -526,6 +526,7 @@ mark {
             "sidebar"
             "footer";
         grid-template-columns: 1fr;
+        padding: 0 10px;
     }
 
     .wiki-nav ul {
@@ -535,27 +536,103 @@ mark {
 
     .search-container {
         flex-direction: column;
+        width: 100%;
     }
 
     #searchInput {
         width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .wiki-header {
         flex-direction: column;
         text-align: center;
+        padding: 0.5rem 0;
+        gap: 10px;
     }
 
-    .title h1 {
-        font-size: 1.75rem;
-        line-height: 2rem;
-        margin: 10px 0;
+    .logo img {
+        height: 60px;
+    }
+
+    .title h1.text-4xl,
+    .title h2.text-4xl {
+        font-size: 1.5rem;
+        line-height: 1.75rem;
+        margin: 5px 0;
+        justify-content: center;
     }
 
     .search-container {
         width: 100%;
         justify-content: center;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 8px;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+
+    #searchButton,
+    .btn-primary {
+        width: 100%;
+        margin: 5px 0;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    .create-article-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Form styles for create-article page */
+    .article-form {
+        padding: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        margin-top: 5px;
+    }
+
+    .tox-tinymce {
+        border-radius: 4px;
+        margin-top: 5px;
+    }
+
+    /* Main content padding */
+    .wiki-content {
+        padding: 10px;
+    }
+
+    /* Adjust spacing between header elements */
+    .home-link {
+        margin: 5px 0;
+    }
+}
+
+/* Additional styles for very small screens */
+@media (max-width: 480px) {
+    .title h1.text-4xl,
+    .title h2.text-4xl {
+        font-size: 1.25rem;
+        line-height: 1.5rem;
+    }
+
+    .logo img {
+        height: 50px;
+    }
+
+    .wiki-container {
+        padding: 0 5px;
     }
 }
