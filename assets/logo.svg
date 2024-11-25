@@ -1,9 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 60">
     <style>
         .text { font-family: Arial, sans-serif; font-weight: bold; }
         .pflege { fill: #2a5a8c; }
         .wiki { fill: #666; }
+        .icon { fill: #2a5a8c; }
     </style>
-    <text x="10" y="40" class="text pflege">Pflege</text>
-    <text x="100" y="40" class="text wiki">Wiki</text>
+    
+    <!-- Healthcare Symbol (Heart with Cross) -->
+    <g transform="translate(10,15) scale(0.8)">
+        <!-- Heart -->
+        <path class="icon" d="M25,10 C25,10 20,0 12.5,0 C5,0 0,7 0,13 C0,19 6,26 12.5,30 C19,26 25,19 25,13 C25,7 20,0 12.5,0 Z"/>
+        <!-- Cross -->
+        <rect class="icon" x="10" y="10" width="5" height="15" fill="white"/>
+        <rect class="icon" x="5" y="15" width="15" height="5" fill="white"/>
+    </g>
+    
+    <!-- Text Elements -->
+    <text x="50" y="40" class="text pflege">Pflege</text>
+    <text x="150" y="40" class="text wiki">Wiki</text>
 </svg>
