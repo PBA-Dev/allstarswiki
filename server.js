@@ -4,16 +4,78 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
+const host = '0.0.0.0';  // Always bind to all interfaces
 const port = process.env.PORT || 3000;
+
+// Enable debugging
+console.log('Starting server...');
+console.log(`Host: ${host}`);
+console.log(`Port: ${port}`);
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from the root directory
-app.use(express.static(__dirname));
+// Article Schema
+const articleSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  content: { type: String, required: true },
+  author: { type: String, required: true },
+  tags: [String],
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
 
-// MongoDB connection with retries
+const Article = mongoose.model('Article', articleSchema);
+
+// Test route to verify server is responding
+app.get('/test', (req, res) => {
+  console.log('Test endpoint hit');
+  res.json({ message: 'Server is running!' });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  console.log('Health check requested');
+  res.json({ 
+    status: 'ok',
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
+// API Routes
+app.get('/api/articles', async (req, res) => {
+  console.log('GET /api/articles requested');
+  try {
+    const articles = await Article.find();
+    res.json(articles);
+  } catch (error) {
+    console.error('Error fetching articles:', error);
+    res.status(500).json({ error: 'Error fetching articles' });
+  }
+});
+
+app.post('/api/articles', async (req, res) => {
+  console.log('POST /api/articles requested:', req.body);
+  try {
+    const article = new Article(req.body);
+    await article.save();
+    res.status(201).json(article);
+  } catch (error) {
+    console.error('Error creating article:', error);
+    res.status(500).json({ error: 'Error creating article' });
+  }
+});
+
+// Serve static files
+console.log('Static files directory:', __dirname);
+app.use(express.static(__dirname, { 
+  index: false,
+  dotfiles: 'ignore',
+  extensions: ['html', 'htm']
+}));
+
+// MongoDB connection
 const mongoURI = process.env.MONGODB_URI || 'mongodb://mongodb:27017/allstarswiki';
 console.log('MongoDB URI:', mongoURI);
 
@@ -23,7 +85,6 @@ const connectWithRetry = () => {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     serverSelectionTimeoutMS: 5000,
-    retryWrites: true,
   })
   .then(() => {
     console.log('Successfully connected to MongoDB');
@@ -38,163 +99,23 @@ const connectWithRetry = () => {
 // Initial connection attempt
 connectWithRetry();
 
-// Handle MongoDB connection events
-mongoose.connection.on('connected', () => {
-  console.log('Mongoose connected to MongoDB');
-});
-
-mongoose.connection.on('error', (err) => {
-  console.error('Mongoose connection error:', err);
-});
-
-mongoose.connection.on('disconnected', () => {
-  console.log('Mongoose disconnected, attempting to reconnect...');
-  setTimeout(connectWithRetry, 5000);
-});
-
-// Article Schema
-const articleSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
-  title: { type: String, required: true },
-  content: { type: String, required: true },
-  author: { type: String, required: true },
-  tags: [String],
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
-
-const Article = mongoose.model('Article', articleSchema);
-
-// Basic error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({ error: err.message });
-});
-
-// API endpoints for articles
-app.post('/api/articles', async (req, res) => {
-  try {
-    console.log('Received POST request:', req.body);
-    const articleData = {
-      ...req.body,
-      id: `article_${Date.now()}`,
-    };
-    const article = new Article(articleData);
-    await article.save();
-    console.log('Article saved:', article);
-    res.status(201).json(article);
-  } catch (error) {
-    console.error('Error saving article:', error);
-    res.status(500).json({ error: 'Failed to save article' });
-  }
-});
-
-// Get all articles
-app.get('/api/articles', async (req, res) => {
-  try {
-    console.log('Fetching all articles');
-    const articles = await Article.find().sort({ createdAt: -1 });
-    console.log('Found articles:', articles);
-    res.json(articles);
-  } catch (error) {
-    console.error('Error fetching articles:', error);
-    res.status(500).json({ error: 'Failed to fetch articles' });
-  }
-});
-
-// Get single article
-app.get('/api/articles/:id', async (req, res) => {
-  try {
-    console.log('Fetching article with id:', req.params.id);
-    const article = await Article.findOne({ id: req.params.id });
-    if (!article) {
-      console.log('Article not found:', req.params.id);
-      return res.status(404).json({ error: 'Article not found' });
-    }
-    res.json(article);
-  } catch (error) {
-    console.error('Error fetching article:', error);
-    res.status(500).json({ error: 'Failed to fetch article' });
-  }
-});
-
-// Update article
-app.put('/api/articles/:id', async (req, res) => {
-  try {
-    console.log('Updating article:', req.params.id, req.body);
-    const article = await Article.findOneAndUpdate(
-      { id: req.params.id },
-      { ...req.body, updatedAt: Date.now() },
-      { new: true }
-    );
-    if (!article) {
-      console.log('Article not found for update:', req.params.id);
-      return res.status(404).json({ error: 'Article not found' });
-    }
-    console.log('Article updated:', article);
-    res.json(article);
-  } catch (error) {
-    console.error('Error updating article:', error);
-    res.status(500).json({ error: 'Failed to update article' });
-  }
-});
-
-// Delete article
-app.delete('/api/articles/:id', async (req, res) => {
-  try {
-    console.log('Deleting article:', req.params.id);
-    const article = await Article.findOneAndDelete({ id: req.params.id });
-    if (!article) {
-      console.log('Article not found for deletion:', req.params.id);
-      return res.status(404).json({ error: 'Article not found' });
-    }
-    console.log('Article deleted:', article);
-    res.json({ message: 'Article deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting article:', error);
-    res.status(500).json({ error: 'Failed to delete article' });
-  }
-});
-
-// Search articles by tag
-app.get('/api/articles/search/tag/:tag', async (req, res) => {
-  try {
-    console.log('Searching articles by tag:', req.params.tag);
-    const articles = await Article.find({ tags: req.params.tag }).sort({ createdAt: -1 });
-    console.log('Found articles with tag:', articles);
-    res.json(articles);
-  } catch (error) {
-    console.error('Error searching articles:', error);
-    res.status(500).json({ error: 'Failed to search articles' });
-  }
-});
-
-// Serve index.html for the root path
+// Root route handler (before catch-all)
 app.get('/', (req, res) => {
+  console.log('Root path requested');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Serve index.html for all other routes
+// Serve index.html for all other routes (must be last)
 app.get('*', (req, res) => {
+  console.log('Serving index.html for path:', req.path);
   res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok',
-    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
-  });
 });
 
 // Start server
-const server = app.listen(port, '0.0.0.0', () => {
-  console.log(`Server running at http://0.0.0.0:${port}`);
+const server = app.listen(port, host, () => {
+  console.log('==================================');
+  console.log(`Server running at http://${host}:${port}`);
   console.log(`Current directory: ${__dirname}`);
   console.log(`MongoDB URI: ${mongoURI}`);
-});
-
-// Handle server errors
-server.on('error', (error) => {
-  console.error('Server error:', error);
+  console.log('==================================');
 });
