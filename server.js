@@ -14,6 +14,7 @@ mongoose.connect(mongoURI)
 
 // Article Schema
 const articleSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
   title: { type: String, required: true },
   content: { type: String, required: true },
   author: { type: String, required: true },
@@ -37,7 +38,11 @@ app.get('/', (req, res) => {
 // API endpoints for articles
 app.post('/api/articles', async (req, res) => {
   try {
-    const article = new Article(req.body);
+    const articleData = {
+      ...req.body,
+      id: `article_${Date.now()}`,
+    };
+    const article = new Article(articleData);
     await article.save();
     res.status(201).json(article);
   } catch (error) {
@@ -59,7 +64,7 @@ app.get('/api/articles', async (req, res) => {
 // Get single article
 app.get('/api/articles/:id', async (req, res) => {
   try {
-    const article = await Article.findById(req.params.id);
+    const article = await Article.findOne({ id: req.params.id });
     if (!article) {
       return res.status(404).json({ error: 'Article not found' });
     }
@@ -72,8 +77,8 @@ app.get('/api/articles/:id', async (req, res) => {
 // Update article
 app.put('/api/articles/:id', async (req, res) => {
   try {
-    const article = await Article.findByIdAndUpdate(
-      req.params.id,
+    const article = await Article.findOneAndUpdate(
+      { id: req.params.id },
       { ...req.body, updatedAt: Date.now() },
       { new: true }
     );
@@ -89,7 +94,7 @@ app.put('/api/articles/:id', async (req, res) => {
 // Delete article
 app.delete('/api/articles/:id', async (req, res) => {
   try {
-    const article = await Article.findByIdAndDelete(req.params.id);
+    const article = await Article.findOneAndDelete({ id: req.params.id });
     if (!article) {
       return res.status(404).json({ error: 'Article not found' });
     }
