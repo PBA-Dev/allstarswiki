@@ -1,11 +1,11 @@
 # Use Node.js base image
 FROM node:18-alpine
 
+# Create app directory
+WORKDIR /app
+
 # Install curl for healthcheck
 RUN apk add --no-cache curl
-
-# Create app directory
-WORKDIR /usr/src/app
 
 # Copy package files first (for better caching)
 COPY package*.json ./
@@ -16,15 +16,17 @@ RUN npm install
 # Copy application files
 COPY . .
 
-# Create data directory with proper permissions
-RUN mkdir -p /usr/src/app/data && \
-    chown -R node:node /usr/src/app
-
-# Switch to non-root user
-USER node
+# Create non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN chown -R appuser:appgroup /app
+USER appuser
 
 # Expose the port
 EXPOSE 3000
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:3000/health || exit 1
+
 # Start the application
-CMD ["node", "server.js"]
+CMD ["npm", "start", "--", "--host", "0.0.0.0", "--port", "3000"]

@@ -3,14 +3,24 @@ const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
 
+// Parse command line arguments
+const args = process.argv.slice(2);
+const hostIndex = args.indexOf('--host');
+const portIndex = args.indexOf('--port');
+
+const HOST = hostIndex !== -1 ? args[hostIndex + 1] : '0.0.0.0';
+const PORT = portIndex !== -1 ? parseInt(args[portIndex + 1]) : 3000;
+
 const app = express();
-const host = '0.0.0.0';
-const port = process.env.PORT || 3000;
+
+// Get environment variables with defaults
+const NODE_ENV = process.env.NODE_ENV;
 
 // Enable debugging
-console.log('Starting server...');
-console.log(`Host: ${host}`);
-console.log(`Port: ${port}`);
+console.log('Starting server with configuration:');
+console.log(`NODE_ENV: ${NODE_ENV}`);
+console.log(`HOST: ${HOST}`);
+console.log(`PORT: ${PORT}`);
 
 // Middleware
 app.use(cors());
@@ -43,38 +53,11 @@ app.get('/api/articles', async (req, res) => {
   console.log('GET /api/articles requested');
   try {
     const articles = await Article.find();
+    console.log(`Found ${articles.length} articles`);
     res.json(articles);
   } catch (error) {
     console.error('Error fetching articles:', error);
     res.status(500).json({ error: 'Error fetching articles' });
-  }
-});
-
-// Create new article
-app.post('/api/articles', async (req, res) => {
-  console.log('POST /api/articles requested:', req.body);
-  try {
-    const article = new Article(req.body);
-    await article.save();
-    res.status(201).json(article);
-  } catch (error) {
-    console.error('Error creating article:', error);
-    res.status(500).json({ error: 'Error creating article' });
-  }
-});
-
-// Get specific article
-app.get('/api/articles/:id', async (req, res) => {
-  console.log('GET /api/articles/:id requested for id:', req.params.id);
-  try {
-    const article = await Article.findById(req.params.id);
-    if (!article) {
-      return res.status(404).json({ error: 'Article not found' });
-    }
-    res.json(article);
-  } catch (error) {
-    console.error('Error fetching article:', error);
-    res.status(500).json({ error: 'Error fetching article' });
   }
 });
 
@@ -86,7 +69,7 @@ app.get('/api/recent-changes', async (req, res) => {
       .sort({ updatedAt: -1 })
       .limit(10)
       .exec();
-    console.log('Recent articles found:', recentArticles.length);
+    console.log(`Found ${recentArticles.length} recent articles`);
     res.json(recentArticles);
   } catch (error) {
     console.error('Error fetching recent changes:', error);
@@ -100,11 +83,12 @@ app.get('/api/random-article', async (req, res) => {
   try {
     const count = await Article.countDocuments();
     if (count === 0) {
+      console.log('No articles found');
       return res.status(404).json({ error: 'No articles found' });
     }
     const random = Math.floor(Math.random() * count);
     const article = await Article.findOne().skip(random);
-    console.log('Random article found:', article._id);
+    console.log(`Found random article: ${article._id}`);
     res.json(article);
   } catch (error) {
     console.error('Error fetching random article:', error);
@@ -112,10 +96,34 @@ app.get('/api/random-article', async (req, res) => {
   }
 });
 
-// Test route to verify server is responding
-app.get('/test', (req, res) => {
-  console.log('Test endpoint hit');
-  res.json({ message: 'Server is running!' });
+// Get specific article
+app.get('/api/articles/:id', async (req, res) => {
+  console.log('GET /api/articles/:id requested for id:', req.params.id);
+  try {
+    const article = await Article.findById(req.params.id);
+    if (!article) {
+      console.log('Article not found:', req.params.id);
+      return res.status(404).json({ error: 'Article not found' });
+    }
+    res.json(article);
+  } catch (error) {
+    console.error('Error fetching article:', error);
+    res.status(500).json({ error: 'Error fetching article' });
+  }
+});
+
+// Create new article
+app.post('/api/articles', async (req, res) => {
+  console.log('POST /api/articles requested:', req.body);
+  try {
+    const article = new Article(req.body);
+    await article.save();
+    console.log('Created new article:', article._id);
+    res.status(201).json(article);
+  } catch (error) {
+    console.error('Error creating article:', error);
+    res.status(500).json({ error: 'Error creating article' });
+  }
 });
 
 // Static file serving - Define AFTER API routes
@@ -133,46 +141,50 @@ app.use(express.static(__dirname, {
 }));
 
 // MongoDB connection
-const mongoURI = process.env.MONGODB_URI || 'mongodb://mongodb:27017/allstarswiki';
-console.log('MongoDB URI:', mongoURI);
+mongoose.connect('mongodb://mongodb:27017/allstarswiki', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch(err => {
+  console.error('MongoDB connection error:', err);
+});
 
-const connectWithRetry = () => {
-  console.log('Attempting to connect to MongoDB...');
-  mongoose.connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000,
-  })
-  .then(() => {
-    console.log('Successfully connected to MongoDB');
-  })
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-    console.log('Retrying connection in 5 seconds...');
-    setTimeout(connectWithRetry, 5000);
+// Start server with explicit binding
+app.listen(PORT, HOST, () => {
+  console.log('==================================');
+  console.log(`Server is running on http://${HOST}:${PORT}`);
+  console.log(`Host binding: ${HOST}`);
+  console.log(`Port: ${PORT}`);
+  console.log(`MongoDB: mongodb://mongodb:27017/allstarswiki`);
+  console.log('==================================');
+});
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  app.close(() => {
+    console.log('HTTP server closed');
+    mongoose.connection.close(false, () => {
+      console.log('MongoDB connection closed');
+      process.exit(0);
+    });
   });
-};
+});
 
-// Initial connection attempt
-connectWithRetry();
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received: closing HTTP server');
+  app.close(() => {
+    console.log('HTTP server closed');
+    mongoose.connection.close(false, () => {
+      console.log('MongoDB connection closed');
+      process.exit(0);
+    });
+  });
+});
 
 // Root route handler - Define LAST
 app.get('/', (req, res) => {
   console.log('Root path requested');
   res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Serve index.html for all other routes (must be last)
-app.get('*', (req, res) => {
-  console.log('Serving index.html for path:', req.path);
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Start server
-const server = app.listen(port, host, () => {
-  console.log('==================================');
-  console.log(`Server running at http://${host}:${port}`);
-  console.log(`Current directory: ${__dirname}`);
-  console.log(`MongoDB URI: ${mongoURI}`);
-  console.log('==================================');
 });

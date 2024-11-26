@@ -8,16 +8,16 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    networks:
+      - wiki-network
+    restart: always
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 10s
-    restart: always
     command: ["--bind_ip_all"]
-    networks:
-      - wiki-network
 
   wiki:
     build: .
@@ -26,23 +26,22 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - PORT=3000
       - HOST=0.0.0.0
+      - PORT=3000
       - MONGODB_URI=mongodb://mongodb:27017/allstarswiki
     depends_on:
       mongodb:
         condition: service_healthy
+    networks:
+      - wiki-network
+    restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 10s
-    restart: always
-    tty: false
-    stdin_open: false
-    networks:
-      - wiki-network
+    stop_grace_period: 30s
 
 networks:
   wiki-network:
