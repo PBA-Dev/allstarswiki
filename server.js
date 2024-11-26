@@ -140,51 +140,52 @@ app.use(express.static(__dirname, {
   dotfiles: 'ignore'
 }));
 
+// Root route handler - Define LAST
+app.get('/', (req, res) => {
+  console.log('Root path requested');
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // MongoDB connection
 mongoose.connect('mongodb://mongodb:27017/allstarswiki', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => {
   console.log('Connected to MongoDB');
+  
+  // Only start server after MongoDB connection is established
+  const server = app.listen(PORT, HOST, () => {
+    console.log('==================================');
+    console.log('Server is running on:');
+    console.log(`Internal URL: http://${HOST}:${PORT}`);
+    console.log(`External URL: http://194.5.159.108:${PORT}`);
+    console.log('MongoDB: Connected');
+    console.log('==================================');
+  });
+
+  // Handle graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+      console.log('HTTP server closed');
+      mongoose.connection.close(false, () => {
+        console.log('MongoDB connection closed');
+        process.exit(0);
+      });
+    });
+  });
+
+  process.on('SIGINT', () => {
+    console.log('SIGINT signal received: closing HTTP server');
+    server.close(() => {
+      console.log('HTTP server closed');
+      mongoose.connection.close(false, () => {
+        console.log('MongoDB connection closed');
+        process.exit(0);
+      });
+    });
+  });
 }).catch(err => {
   console.error('MongoDB connection error:', err);
-});
-
-// Start server with explicit binding
-app.listen(PORT, HOST, () => {
-  console.log('==================================');
-  console.log(`Server is running on http://${HOST}:${PORT}`);
-  console.log(`Host binding: ${HOST}`);
-  console.log(`Port: ${PORT}`);
-  console.log(`MongoDB: mongodb://mongodb:27017/allstarswiki`);
-  console.log('==================================');
-});
-
-// Handle graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
-  app.close(() => {
-    console.log('HTTP server closed');
-    mongoose.connection.close(false, () => {
-      console.log('MongoDB connection closed');
-      process.exit(0);
-    });
-  });
-});
-
-process.on('SIGINT', () => {
-  console.log('SIGINT signal received: closing HTTP server');
-  app.close(() => {
-    console.log('HTTP server closed');
-    mongoose.connection.close(false, () => {
-      console.log('MongoDB connection closed');
-      process.exit(0);
-    });
-  });
-});
-
-// Root route handler - Define LAST
-app.get('/', (req, res) => {
-  console.log('Root path requested');
-  res.sendFile(path.join(__dirname, 'index.html'));
+  process.exit(1);
 });
