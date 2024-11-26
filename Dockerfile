@@ -5,23 +5,22 @@ FROM node:18-alpine
 WORKDIR /usr/src/app
 
 # Copy package files
-COPY server/package*.json ./
+COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci --only=production
 
-# Copy server files
-COPY server/ ./
-COPY index.html ./
-COPY css/ ./css/
-COPY js/ ./js/
-COPY data/ ./data/
+# Copy application files
+COPY . .
 
-# Create data directory
-RUN mkdir -p data
+# Create data directory with proper permissions
+RUN mkdir -p data && chown -R node:node /usr/src/app
 
-# Expose port
+# Switch to non-root user
+USER node
+
+# Expose the port
 EXPOSE 3000
 
-# Start the server
+# Start the application
 CMD ["npm", "start"]

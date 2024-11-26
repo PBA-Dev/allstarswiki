@@ -1,9 +1,27 @@
-version: '3'
+version: '3.8'
+
 services:
   wiki:
     build: .
+    container_name: allstars-wiki
     ports:
       - "3000:3000"
     volumes:
-      - ./data:/usr/src/app/data
+      - wiki-data:/usr/src/app/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  wiki-data:
+    name: allstars-wiki-data
