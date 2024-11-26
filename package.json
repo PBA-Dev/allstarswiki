@@ -1,15 +1,15 @@
 {
-  "name": "pflegeberatung-clone",
+  "name": "allstars-wiki",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "AllStars Wiki - A knowledge base system",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
-    "serve": "^14.2.4"
+    "express": "^4.18.2"
   }
 }

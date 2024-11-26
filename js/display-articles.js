@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     const articleGrid = document.getElementById('articleGrid');
     const searchInput = document.getElementById('searchInput');
     const categoryFilter = document.getElementById('categoryFilter');
@@ -6,11 +6,16 @@ document.addEventListener('DOMContentLoaded', function() {
     let articles = [];
     let filteredArticles = [];
     
-    function loadArticles() {
-        // Get articles from localStorage
-        articles = JSON.parse(localStorage.getItem('wikiArticles') || '[]');
-        filteredArticles = [...articles];
-        displayArticles();
+    async function loadArticles() {
+        try {
+            // Get articles using ArticleStorage
+            articles = await ArticleStorage.getAllArticles();
+            filteredArticles = [...articles];
+            displayArticles();
+        } catch (error) {
+            console.error('Error loading articles:', error);
+            articleGrid.innerHTML = '<div class="error">Fehler beim Laden der Artikel</div>';
+        }
     }
     
     function getFirstImage(content) {
@@ -26,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return div.textContent || div.innerText || '';
     }
     
-    function createArticlePreview(article, index) {
+    function createArticlePreview(article) {
         const previewText = stripHtml(article.content).substring(0, 150) + '...';
         const imageSrc = getFirstImage(article.content);
         
@@ -46,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span>Kategorie: ${article.category}</span>
                 <span>${new Date(article.createdAt).toLocaleDateString()}</span>
             </div>
-            <a href="#" class="read-more" onclick="viewArticle(${index}); return false;">Weiterlesen →</a>
+            <a href="#" class="read-more" onclick="viewArticle('${article.id}'); return false;">Weiterlesen →</a>
         `;
         
         return articleElement;
@@ -60,30 +65,36 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        filteredArticles.forEach((article, index) => {
-            const articleElement = createArticlePreview(article, index);
+        filteredArticles.forEach((article) => {
+            const articleElement = createArticlePreview(article);
             articleGrid.appendChild(articleElement);
         });
     }
     
-    function filterArticles() {
+    async function filterArticles() {
         const searchTerm = searchInput.value.toLowerCase();
         const selectedCategory = categoryFilter.value;
         
-        filteredArticles = articles.filter(article => {
-            const matchesSearch = article.title.toLowerCase().includes(searchTerm) ||
-                                stripHtml(article.content).toLowerCase().includes(searchTerm);
-            const matchesCategory = !selectedCategory || article.category === selectedCategory;
-            
-            return matchesSearch && matchesCategory;
-        });
-        
-        displayArticles();
+        try {
+            filteredArticles = await ArticleStorage.searchArticles(searchTerm, selectedCategory);
+            displayArticles();
+        } catch (error) {
+            console.error('Error filtering articles:', error);
+            articleGrid.innerHTML = '<div class="error">Fehler beim Filtern der Artikel</div>';
+        }
     }
     
-    window.viewArticle = function(index) {
-        localStorage.setItem('currentArticle', JSON.stringify(filteredArticles[index]));
-        window.location.href = 'view-article.html';
+    window.viewArticle = async function(articleId) {
+        try {
+            const article = await ArticleStorage.getArticle(articleId);
+            if (article) {
+                localStorage.setItem('currentArticle', JSON.stringify(article));
+                window.location.href = 'view-article.html';
+            }
+        } catch (error) {
+            console.error('Error viewing article:', error);
+            alert('Fehler beim Laden des Artikels');
+        }
     };
     
     // Event listeners

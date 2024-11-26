@@ -1,51 +1,48 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize TinyMCE
-    tinymce.init({
-        selector: '#articleContent',
-        plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-        images_upload_url: 'upload.php', // You'll need to implement this endpoint
-        automatic_uploads: true,
-        images_reuse_filename: true,
-        height: 500,
-        menubar: true,
-        // Add a custom button for local image upload
-        setup: function(editor) {
-            editor.ui.registry.addButton('localimage', {
-                text: 'Upload Local Image',
-                onAction: function() {
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = 'image/*';
-                    
-                    input.onchange = function() {
-                        const file = this.files[0];
-                        if (file) {
-                            const reader = new FileReader();
-                            reader.onload = function(e) {
-                                const base64 = e.target.result;
-                                editor.insertContent(`<img src="${base64}" alt="Uploaded Image">`);
-                            };
-                            reader.readAsDataURL(file);
-                        }
-                    };
-                    
-                    input.click();
-                }
-            });
+    // Initialize Quill editor
+    const quill = new Quill('#editor-container', {
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'color': [] }, { 'background': [] }],
+                ['link', 'image'],
+                ['clean']
+            ]
         },
-        toolbar_mode: 'sliding',
-        content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; font-size: 16px; line-height: 1.6; }'
+        placeholder: 'Schreiben Sie hier Ihren Artikel...',
+        theme: 'snow'
     });
 
-    const articleForm = document.getElementById('articleForm');
+    // Handle image upload
+    quill.getModule('toolbar').addHandler('image', () => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
 
-    articleForm.addEventListener('submit', function(e) {
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const range = quill.getSelection(true);
+                    quill.insertEmbed(range.index, 'image', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+    });
+
+    // Handle form submission
+    document.getElementById('articleForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // Get form values
         const title = document.getElementById('articleTitle').value;
         const category = document.getElementById('articleCategory').value;
-        const content = tinymce.activeEditor.getContent(); // Get content from TinyMCE
+        const content = quill.root.innerHTML;
 
         // Basic validation
         if (!title.trim() || !category || !content.trim()) {
@@ -53,22 +50,25 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Create article object
-        const article = {
-            title: title,
-            category: category,
-            content: content,
-            createdAt: new Date().toISOString(),
-            lastModified: new Date().toISOString()
-        };
+        try {
+            // Create article object
+            const article = {
+                title: title,
+                category: category,
+                content: content,
+                createdAt: new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            };
 
-        // Store article in localStorage
-        let articles = JSON.parse(localStorage.getItem('wikiArticles') || '[]');
-        articles.push(article);
-        localStorage.setItem('wikiArticles', JSON.stringify(articles));
-
-        // Redirect to homepage after saving
-        alert('Artikel wurde erfolgreich gespeichert!');
-        window.location.href = 'index.html';
+            // Save article using ArticleStorage
+            await ArticleStorage.saveArticle(article);
+            
+            // Show success message and redirect
+            alert('Artikel erfolgreich gespeichert!');
+            window.location.href = 'index.html';
+        } catch (error) {
+            console.error('Error saving article:', error);
+            alert('Fehler beim Speichern des Artikels. Bitte versuchen Sie es erneut.');
+        }
     });
 });
