@@ -6,13 +6,13 @@ services:
     container_name: allstars-wiki
     ports:
       - "3000:3000"
-    volumes:
-      - wiki-data:/usr/src/app/data
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongodb:27017/allstarswiki
     depends_on:
       - mongodb
+    volumes:
+      - wiki-data:/usr/src/app/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:3000"]
