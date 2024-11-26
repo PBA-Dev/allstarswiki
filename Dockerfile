@@ -11,10 +11,15 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # Copy application files
-COPY . .
+COPY index.html ./
+COPY css/ ./css/
+COPY js/ ./js/
+COPY server.js ./
+COPY assets/ ./assets/
+COPY articles/ ./articles/
 
 # Create data directory with proper permissions
-RUN mkdir -p data && chown -R node:node /usr/src/app
+RUN mkdir -p data/articles && chown -R node:node /usr/src/app
 
 # Switch to non-root user
 USER node
