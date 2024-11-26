@@ -7,7 +7,7 @@ const app = express();
 const port = 3000;
 
 // MongoDB connection
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/allstarswiki';
+const mongoURI = process.env.MONGODB_URI || 'mongodb://mongodb:27017/allstarswiki';
 mongoose.connect(mongoURI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
@@ -46,16 +46,17 @@ app.post('/api/articles', async (req, res) => {
   }
 });
 
+// Get all articles
 app.get('/api/articles', async (req, res) => {
   try {
     const articles = await Article.find().sort({ createdAt: -1 });
     res.json(articles);
   } catch (error) {
-    console.error('Error fetching articles:', error);
     res.status(500).json({ error: 'Failed to fetch articles' });
   }
 });
 
+// Get single article
 app.get('/api/articles/:id', async (req, res) => {
   try {
     const article = await Article.findById(req.params.id);
@@ -64,11 +65,11 @@ app.get('/api/articles/:id', async (req, res) => {
     }
     res.json(article);
   } catch (error) {
-    console.error('Error fetching article:', error);
     res.status(500).json({ error: 'Failed to fetch article' });
   }
 });
 
+// Update article
 app.put('/api/articles/:id', async (req, res) => {
   try {
     const article = await Article.findByIdAndUpdate(
@@ -81,11 +82,11 @@ app.put('/api/articles/:id', async (req, res) => {
     }
     res.json(article);
   } catch (error) {
-    console.error('Error updating article:', error);
     res.status(500).json({ error: 'Failed to update article' });
   }
 });
 
+// Delete article
 app.delete('/api/articles/:id', async (req, res) => {
   try {
     const article = await Article.findByIdAndDelete(req.params.id);
@@ -94,8 +95,17 @@ app.delete('/api/articles/:id', async (req, res) => {
     }
     res.json({ message: 'Article deleted successfully' });
   } catch (error) {
-    console.error('Error deleting article:', error);
     res.status(500).json({ error: 'Failed to delete article' });
+  }
+});
+
+// Search articles by tag
+app.get('/api/articles/search/tag/:tag', async (req, res) => {
+  try {
+    const articles = await Article.find({ tags: req.params.tag }).sort({ createdAt: -1 });
+    res.json(articles);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to search articles' });
   }
 });
 
