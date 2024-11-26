@@ -1,8 +1,10 @@
-// Article storage management using server API
+// Article storage management using backend API
 class ArticleStorage {
+    static API_BASE_URL = '/api';
+
     static async saveArticle(article) {
         try {
-            const response = await fetch('/api/articles', {
+            const response = await fetch(`${this.API_BASE_URL}/articles`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -23,7 +25,7 @@ class ArticleStorage {
 
     static async getArticle(articleId) {
         try {
-            const response = await fetch(`/api/articles/${articleId}`);
+            const response = await fetch(`${this.API_BASE_URL}/articles/${articleId}`);
             if (!response.ok) {
                 throw new Error('Article not found');
             }
@@ -36,9 +38,9 @@ class ArticleStorage {
 
     static async getAllArticles() {
         try {
-            const response = await fetch('/api/articles');
+            const response = await fetch(`${this.API_BASE_URL}/articles`);
             if (!response.ok) {
-                throw new Error('Failed to get articles');
+                throw new Error('Failed to fetch articles');
             }
             return await response.json();
         } catch (error) {
@@ -51,8 +53,12 @@ class ArticleStorage {
         try {
             const articles = await this.getAllArticles();
             return articles.filter(article => {
-                const matchesQuery = article.title.toLowerCase().includes(query.toLowerCase());
+                const matchesQuery = !query || 
+                    article.title.toLowerCase().includes(query.toLowerCase()) ||
+                    article.content.toLowerCase().includes(query.toLowerCase());
+                
                 const matchesCategory = !category || article.category === category;
+                
                 return matchesQuery && matchesCategory;
             });
         } catch (error) {
@@ -63,12 +69,13 @@ class ArticleStorage {
 
     static async deleteArticle(articleId) {
         try {
-            const response = await fetch(`/api/articles/${articleId}`, {
+            const response = await fetch(`${this.API_BASE_URL}/articles/${articleId}`, {
                 method: 'DELETE'
             });
             if (!response.ok) {
                 throw new Error('Failed to delete article');
             }
+            return true;
         } catch (error) {
             console.error('Error deleting article:', error);
             throw error;

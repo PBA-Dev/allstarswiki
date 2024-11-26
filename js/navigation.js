@@ -1,26 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const nav = document.querySelector('.wiki-nav');
+    const nav = document.querySelector('.quick-links');
+    if (!nav) return; // Exit if navigation element doesn't exist
+    
     const currentPath = window.location.pathname;
 
     // Highlight current page in navigation
     const navLinks = nav.querySelectorAll('a');
-    navLinks.forEach(link => {
-        if (link.getAttribute('href') === currentPath.split('/').pop()) {
-            link.classList.add('active');
-        }
-    });
+    if (navLinks) {
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath.split('/').pop()) {
+                link.classList.add('active');
+            }
+        });
+    }
 
     // Mobile navigation toggle
     const createMobileNav = () => {
-        const mobileNav = document.createElement('button');
-        mobileNav.className = 'mobile-nav-toggle';
-        mobileNav.innerHTML = '☰';
-        nav.prepend(mobileNav);
+        if (!nav.querySelector('.mobile-nav-toggle')) {  // Only create if it doesn't exist
+            const mobileNav = document.createElement('button');
+            mobileNav.className = 'mobile-nav-toggle';
+            mobileNav.innerHTML = '☰';
+            nav.prepend(mobileNav);
 
-        const navList = nav.querySelector('ul');
-        mobileNav.addEventListener('click', () => {
-            navList.classList.toggle('show');
-        });
+            const navList = nav.querySelector('ul');
+            if (navList) {
+                mobileNav.addEventListener('click', () => {
+                    navList.classList.toggle('show');
+                });
+            }
+        }
     };
 
     // Create mobile navigation if screen width is below 768px
@@ -28,18 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
         createMobileNav();
     }
 
-    // Handle window resize
+    // Update navigation on window resize
     window.addEventListener('resize', () => {
         if (window.innerWidth < 768) {
-            if (!document.querySelector('.mobile-nav-toggle')) {
-                createMobileNav();
-            }
+            createMobileNav();
         } else {
-            const mobileNav = document.querySelector('.mobile-nav-toggle');
+            const mobileNav = nav.querySelector('.mobile-nav-toggle');
             if (mobileNav) {
                 mobileNav.remove();
             }
-            nav.querySelector('ul').classList.remove('show');
+            const navList = nav.querySelector('ul');
+            if (navList) {
+                navList.classList.remove('show');
+            }
         }
     });
 });
