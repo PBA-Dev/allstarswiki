@@ -4,22 +4,21 @@ FROM node:18-alpine
 # Create app directory
 WORKDIR /usr/src/app
 
+# Install MongoDB client tools
+RUN apk add --no-cache mongodb-tools
+
 # Copy package files
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install --production
+RUN npm install
 
 # Copy application files
-COPY index.html ./
-COPY css/ ./css/
-COPY js/ ./js/
-COPY server.js ./
-COPY assets/ ./assets/
-COPY articles/ ./articles/
+COPY . .
 
 # Create data directory with proper permissions
-RUN mkdir -p data/articles && chown -R node:node /usr/src/app
+RUN mkdir -p /usr/src/app/data && \
+    chown -R node:node /usr/src/app
 
 # Switch to non-root user
 USER node
@@ -28,4 +27,4 @@ USER node
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

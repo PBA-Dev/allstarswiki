@@ -1,6 +1,17 @@
 version: '3.8'
 
 services:
+  mongodb:
+    image: mongo:latest
+    container_name: allstars-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    networks:
+      - wiki-network
+
   wiki:
     build: .
     container_name: allstars-wiki
@@ -11,29 +22,14 @@ services:
       - MONGODB_URI=mongodb://mongodb:27017/allstarswiki
     depends_on:
       - mongodb
-    volumes:
-      - wiki-data:/usr/src/app/data
+    networks:
+      - wiki-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:3000"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
-  mongodb:
-    image: mongo:latest
-    container_name: allstars-mongodb
-    volumes:
-      - mongodb_data:/data/db
-    restart: unless-stopped
+networks:
+  wiki-network:
+    driver: bridge
 
 volumes:
-  wiki-data:
-    name: allstars-wiki-data
   mongodb_data:
-    name: allstars-wiki-mongodb
+    driver: local
