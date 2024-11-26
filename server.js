@@ -67,6 +67,49 @@ app.post('/api/articles', async (req, res) => {
   }
 });
 
+// Get specific article endpoint
+app.get('/api/articles/:id', async (req, res) => {
+  console.log('GET /api/articles/:id requested for id:', req.params.id);
+  try {
+    const article = await Article.findById(req.params.id);
+    if (!article) {
+      return res.status(404).json({ error: 'Article not found' });
+    }
+    res.json(article);
+  } catch (error) {
+    console.error('Error fetching article:', error);
+    res.status(500).json({ error: 'Error fetching article' });
+  }
+});
+
+// Recent changes endpoint
+app.get('/api/recent-changes', async (req, res) => {
+  console.log('GET /api/recent-changes requested');
+  try {
+    const recentArticles = await Article.find()
+      .sort({ updatedAt: -1 })
+      .limit(10);
+    res.json(recentArticles);
+  } catch (error) {
+    console.error('Error fetching recent changes:', error);
+    res.status(500).json({ error: 'Error fetching recent changes' });
+  }
+});
+
+// Random article endpoint
+app.get('/api/random-article', async (req, res) => {
+  console.log('GET /api/random-article requested');
+  try {
+    const count = await Article.countDocuments();
+    const random = Math.floor(Math.random() * count);
+    const article = await Article.findOne().skip(random);
+    res.json(article);
+  } catch (error) {
+    console.error('Error fetching random article:', error);
+    res.status(500).json({ error: 'Error fetching random article' });
+  }
+});
+
 // Serve static files
 console.log('Static files directory:', __dirname);
 app.use(express.static(__dirname, { 
