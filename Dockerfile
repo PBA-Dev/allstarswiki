@@ -4,10 +4,7 @@ FROM node:18-alpine
 # Create app directory
 WORKDIR /usr/src/app
 
-# Install MongoDB client tools
-RUN apk add --no-cache mongodb-tools
-
-# Copy package files
+# Copy package files first (for better caching)
 COPY package*.json ./
 
 # Install dependencies
