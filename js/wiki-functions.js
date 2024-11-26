@@ -1,14 +1,21 @@
 // Function to show recent changes
 async function showRecentChanges() {
     try {
+        console.log('Fetching recent changes...');
         const response = await fetch('/api/recent-changes');
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         const articles = await response.json();
+        console.log('Recent changes received:', articles.length, 'articles');
         
         // Clear existing articles
         const articleGrid = document.getElementById('articleGrid');
+        if (!articleGrid) {
+            console.error('Article grid element not found!');
+            return;
+        }
+        
         articleGrid.innerHTML = '<h2>Aktuelle Änderungen</h2>';
         
         // Display recent articles
@@ -34,15 +41,21 @@ async function showRecentChanges() {
 // Function to open a random article
 async function openRandomArticle() {
     try {
+        console.log('Fetching random article...');
         const response = await fetch('/api/random-article');
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         const article = await response.json();
+        console.log('Random article received:', article._id);
         
         if (article) {
-            // Clear existing articles and show the random one
             const articleGrid = document.getElementById('articleGrid');
+            if (!articleGrid) {
+                console.error('Article grid element not found!');
+                return;
+            }
+            
             articleGrid.innerHTML = '<h2>Zufälliger Artikel</h2>';
             
             const articleCard = document.createElement('div');
@@ -68,14 +81,20 @@ async function openRandomArticle() {
 // Function to view a specific article
 async function viewArticle(articleId) {
     try {
+        console.log('Fetching article:', articleId);
         const response = await fetch(`/api/articles/${articleId}`);
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         const article = await response.json();
+        console.log('Article received:', article._id);
         
-        // Clear existing content and show the full article
         const articleGrid = document.getElementById('articleGrid');
+        if (!articleGrid) {
+            console.error('Article grid element not found!');
+            return;
+        }
+        
         articleGrid.innerHTML = '';
         
         const articleView = document.createElement('div');
@@ -94,3 +113,47 @@ async function viewArticle(articleId) {
         alert('Fehler beim Laden des Artikels');
     }
 }
+
+// Function to load all articles
+async function loadAllArticles() {
+    try {
+        console.log('Loading all articles...');
+        const response = await fetch('/api/articles');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const articles = await response.json();
+        console.log('All articles received:', articles.length, 'articles');
+        
+        const articleGrid = document.getElementById('articleGrid');
+        if (!articleGrid) {
+            console.error('Article grid element not found!');
+            return;
+        }
+        
+        articleGrid.innerHTML = '<h2>Alle Artikel</h2>';
+        
+        articles.forEach(article => {
+            const articleCard = document.createElement('div');
+            articleCard.className = 'article-card';
+            const date = new Date(article.updatedAt).toLocaleDateString('de-DE');
+            
+            articleCard.innerHTML = `
+                <h3>${article.title}</h3>
+                <p class="article-meta">Zuletzt aktualisiert: ${date}</p>
+                <p class="article-preview">${article.content.substring(0, 150)}...</p>
+                <button onclick="viewArticle('${article._id}')" class="btn-secondary">Artikel lesen</button>
+            `;
+            articleGrid.appendChild(articleCard);
+        });
+    } catch (error) {
+        console.error('Error loading articles:', error);
+        alert('Fehler beim Laden der Artikel');
+    }
+}
+
+// Load articles when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, initializing...');
+    loadAllArticles();
+});

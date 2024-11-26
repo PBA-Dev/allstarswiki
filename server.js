@@ -4,7 +4,7 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-const host = '0.0.0.0';  // Always bind to all interfaces
+const host = '0.0.0.0';
 const port = process.env.PORT || 3000;
 
 // Enable debugging
@@ -28,12 +28,7 @@ const articleSchema = new mongoose.Schema({
 
 const Article = mongoose.model('Article', articleSchema);
 
-// Test route to verify server is responding
-app.get('/test', (req, res) => {
-  console.log('Test endpoint hit');
-  res.json({ message: 'Server is running!' });
-});
-
+// API Routes - Define these BEFORE static file serving
 // Health check endpoint
 app.get('/health', (req, res) => {
   console.log('Health check requested');
@@ -43,7 +38,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API Routes
+// Get all articles
 app.get('/api/articles', async (req, res) => {
   console.log('GET /api/articles requested');
   try {
@@ -55,6 +50,7 @@ app.get('/api/articles', async (req, res) => {
   }
 });
 
+// Create new article
 app.post('/api/articles', async (req, res) => {
   console.log('POST /api/articles requested:', req.body);
   try {
@@ -67,7 +63,7 @@ app.post('/api/articles', async (req, res) => {
   }
 });
 
-// Get specific article endpoint
+// Get specific article
 app.get('/api/articles/:id', async (req, res) => {
   console.log('GET /api/articles/:id requested for id:', req.params.id);
   try {
@@ -82,13 +78,15 @@ app.get('/api/articles/:id', async (req, res) => {
   }
 });
 
-// Recent changes endpoint
+// Get recent changes
 app.get('/api/recent-changes', async (req, res) => {
   console.log('GET /api/recent-changes requested');
   try {
     const recentArticles = await Article.find()
       .sort({ updatedAt: -1 })
-      .limit(10);
+      .limit(10)
+      .exec();
+    console.log('Recent articles found:', recentArticles.length);
     res.json(recentArticles);
   } catch (error) {
     console.error('Error fetching recent changes:', error);
@@ -96,13 +94,17 @@ app.get('/api/recent-changes', async (req, res) => {
   }
 });
 
-// Random article endpoint
+// Get random article
 app.get('/api/random-article', async (req, res) => {
   console.log('GET /api/random-article requested');
   try {
     const count = await Article.countDocuments();
+    if (count === 0) {
+      return res.status(404).json({ error: 'No articles found' });
+    }
     const random = Math.floor(Math.random() * count);
     const article = await Article.findOne().skip(random);
+    console.log('Random article found:', article._id);
     res.json(article);
   } catch (error) {
     console.error('Error fetching random article:', error);
@@ -110,12 +112,24 @@ app.get('/api/random-article', async (req, res) => {
   }
 });
 
-// Serve static files
-console.log('Static files directory:', __dirname);
+// Test route to verify server is responding
+app.get('/test', (req, res) => {
+  console.log('Test endpoint hit');
+  res.json({ message: 'Server is running!' });
+});
+
+// Static file serving - Define AFTER API routes
+// Serve JavaScript files from js directory
+app.use('/js', express.static(path.join(__dirname, 'js'), {
+  setHeaders: (res, path) => {
+    res.set('Content-Type', 'application/javascript');
+  }
+}));
+
+// Serve static files from root directory
 app.use(express.static(__dirname, { 
   index: false,
-  dotfiles: 'ignore',
-  extensions: ['html', 'htm']
+  dotfiles: 'ignore'
 }));
 
 // MongoDB connection
@@ -142,7 +156,7 @@ const connectWithRetry = () => {
 // Initial connection attempt
 connectWithRetry();
 
-// Root route handler (before catch-all)
+// Root route handler - Define LAST
 app.get('/', (req, res) => {
   console.log('Root path requested');
   res.sendFile(path.join(__dirname, 'index.html'));
